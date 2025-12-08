@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 
 
@@ -16,12 +17,13 @@ def query_input():
     if submitted:
         if not query.strip():
             st.warning("Please fill in the search input properly.")
+            st.session_state.clear()
             return
 
         st.session_state.query = query
         st.session_state.query_submitted = True
         st.session_state.scraping_in_progress = True
-
+        st.session_state.started_at = time.time()
     else:
         st.session_state.query_submitted = False
         st.session_state.scraping_in_progress = False

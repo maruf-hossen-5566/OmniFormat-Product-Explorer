@@ -11,6 +11,6 @@ def get_proxy():
     port = os.getenv("DATAIMPULSE_PORT")
 
     if not all([user, pwd, host, port]):
-        raise ValueError("! Missing proxy environment variables.")
+        raise ValueError("!Missing proxy environment variables!")
 
     return f"http://{user}:{pwd}@{host}:{port}"
