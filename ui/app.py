@@ -53,11 +53,9 @@ def data_preview():
             csv_preview_tab(query, data)
         with stc_tab:
             stc_preview_tab(query, data)
-        with st.container(horizontal_alignment="center"):
-            st.space("stretch")
-            if st.button("Clear Results", type="primary", key="clear-results-btn"):
-                st.session_state.clear()
-                st.rerun()
+        if st.button("Clear Results", type="primary", key="clear-results-btn", width="stretch"):
+            st.session_state.clear()
+            st.rerun()
 
 
 def run_scraping():

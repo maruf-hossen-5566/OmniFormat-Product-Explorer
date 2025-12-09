@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environments
+.env
+.env.*
+venv/
+.venv/
+
+# Streamlit
+.streamlit/
+
+# Selenium drivers / temp downloads
+drivers/
+downloads/
+*.log
+
+# Byte-compiled / cache
+.cache/
+*.sqlite3
+
+# IDE files
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db

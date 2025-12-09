@@ -13,15 +13,14 @@ def stop_button():
 
     with st.container(horizontal_alignment="center"):
         if st.button("Stop / Reset"):
-            driver = st.session_state.get("driver")
-            if driver:
+            if st.session_state.get("driver"):
                 logger.info("Closing the browser...")
+                st.session_state.driver.quit()
                 started_at = st.session_state.get("started_at", 0)
                 if started_at:
                     logger.info(
-                        f"Scraping took '{round(time.time() - started_at)}' seconds."
+                        f"Scarping cancelled in '{round(time.time() - started_at)}' seconds."
                     )
-                driver.quit()
             st.session_state.clear()
             st.rerun()
     st.divider()
