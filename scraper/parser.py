@@ -13,8 +13,9 @@ def extract_ratings(product):
         elem = product.select_one("[data-cy='reviews-ratings-slot']>span")
         rating = f"{elem.get_text(strip=True).split(' ')[0]} stars" if elem else "--"
         return rating
-    except:
+    except Exception as e:
         logger.exception("Failed at 'ratings' extraction.")
+        raise e
 
 
 def extract_reviews_count(product):
@@ -25,23 +26,21 @@ def extract_reviews_count(product):
             reviews = f"{elem.get_text(strip=True)[1:-1]}" if elem else "--"
             return reviews
         return "--"
-    except:
+    except Exception as e:
         logger.exception("Failed at 'reviews' extraction.")
+        raise e
 
 
 def extract_asin_and_title(product):
     try:
-        asin = (
-            product.attrs.get("data-asin")
-            if product and product.has_attr("data-asin")
-            else "--"
-        )
+        asin = product.attrs.get("data-asin") if product and product.has_attr("data-asin") else "--"
 
-        title_elem = product.select_one("[data-cy='title-recipe']")
+        title_elem = product.select_one("[data-cy='title-recipe'] h2 span")
         title = title_elem.get_text(strip=True) if title_elem else None
         return asin, title
-    except:
+    except Exception as e:
         logger.exception("Failed at 'asin and title' extraction.")
+        raise e
 
 
 def extract_thumbnail(product):
@@ -53,8 +52,9 @@ def extract_thumbnail(product):
             else "--"
         )
         return thumbnail
-    except:
+    except Exception as e:
         logger.exception("Failed at 'thumbnail' extraction.")
+        raise e
 
 
 def extract_price(product):
@@ -65,8 +65,9 @@ def extract_price(product):
         currency = price_elem.get_text(strip=True)[0] if price_elem else "--"
         price = price_elem.get_text(strip=True)[1:] if price_elem else "--"
         return currency, price
-    except:
+    except Exception as e:
         logger.exception("Failed at 'price' extraction.")
+        raise e
 
 
 def extract_link(product):
@@ -78,8 +79,9 @@ def extract_link(product):
             else "--"
         )
         return link
-    except:
+    except Exception as e:
         logger.exception("Failed at 'link' extraction.")
+        raise e
 
 
 def parse_product(product):
@@ -104,15 +106,13 @@ def parse_product(product):
             "reviews_count": reviews_count,
             "link": link,
         }
-    except:
-        return None
+    except Exception as e:
+        raise e
 
 
 def parser(html):
     soup = BeautifulSoup(html, "html.parser")
-    products = soup.select("[data-asin]:not([data-asin=''])") or soup.select(
-        "[data-component-type='s-search-result']"
-    )
+    products = soup.select("[data-component-type='s-search-result']") or soup.select("[data-asin]:not([data-asin=''])")
 
     parsed_data = []
     for product in products:

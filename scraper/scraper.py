@@ -17,18 +17,19 @@ load_dotenv()
 
 
 def run_bot_detection(driver, wait):
+    random_sleep()
     try:
         logger.info("Waiting for 'continue shopping' button...")
-        continue_btn_selector = (By.CSS_SELECTOR, "button[type='submit']")
-        wait.until(EC.presence_of_element_located(continue_btn_selector))
-        continue_btn = wait.until(EC.element_to_be_clickable(continue_btn_selector))
-        if continue_btn:
-            continue_btn.click()
-            logger.info("Successfully clicked 'continue shopping' button.")
-            return
+        if "Click the button below to continue shopping" in driver.page_source:
+            continue_btn_selector = (By.CSS_SELECTOR, "button[type='submit']")
+            wait.until(EC.presence_of_element_located(continue_btn_selector))
+            continue_btn = wait.until(EC.element_to_be_clickable(continue_btn_selector))
+            if continue_btn:
+                continue_btn.click()
+                logger.info("Successfully clicked 'continue shopping' button.")
+                return
     except Exception as e:
-        logger.exception("Failed clicking 'continue shopping' button.")
-        print(f"Failed clicking 'continue shopping' button.\n{e}")
+        logger.info("Failed clicking 'continue shopping' button.")
 
     try:
         logger.info("Waiting for 'something went wrong' image...")
@@ -42,14 +43,14 @@ def run_bot_detection(driver, wait):
             image.click()
             return
     except Exception as e:
-        logger.exception("Failed clicking 'something went wrong' image")
-        print(f"Failed clicking 'something went wrong' image.\n{e}")
+        logger.info("Failed clicking 'something went wrong' image")
 
     logger.info("Bot detection complete.")
     time.sleep(0.7)
 
 
-def run_location_change(driver, wait):
+"""Uncomment this method to change location if not US"""
+"""def run_location_change(driver, wait):
     try:
         logger.info("Waiting for 'zip change modal' button...")
         zip_change_modal_btn_selector = (By.ID, "nav-global-location-slot")
@@ -61,7 +62,6 @@ def run_location_change(driver, wait):
             zip_change_modal_btn.click()
     except Exception as e:
         logger.exception("Failed clicking 'zip change modal' button.")
-        print(f"Failed clicking 'zip change modal' image.\n{e}")
 
     try:
         logger.info("Waiting for 'zip input' field...")
@@ -78,7 +78,6 @@ def run_location_change(driver, wait):
             logger.info(f"Successfully filled and submitted zip input.")
     except Exception as e:
         logger.exception("Failed filling and submitting zip input field.")
-        print(f"Failed filling and submitting zip input field.\n{e}")
 
     try:
         logger.info("Waiting for 'zip apply' button...")
@@ -88,27 +87,28 @@ def run_location_change(driver, wait):
             logger.info("Successfully clicked 'zip apply' button.")
     except Exception as e:
         logger.info("Failed/Skipped clicking 'zip apply' button.")
-        print(f"Failed/Skipped clicking 'zip apply' button.\n{e}")
 
     random_sleep()
     logger.info("Successfully completed location change.")
-    driver.refresh()
+    driver.refresh()"""
 
 
 def run_search(driver, wait, query):
     try:
-        logger.info("Waiting for 'search input' field...")
         random_sleep()
+        logger.info("Waiting for 'search input' field...")
         search_input_selector = (By.ID, "twotabsearchtextbox")
         wait.until(EC.presence_of_element_located(search_input_selector))
         search_input = wait.until(EC.element_to_be_clickable(search_input_selector))
         logger.info(f"User searched for '{query}'.")
         if search_input:
-            search_input.send_keys(query + Keys.ENTER)
+            search_input.clear()
+            search_input.send_keys(f"{query}" + Keys.ENTER)
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             logger.info("Successfully filled and submitted search input.")
     except Exception as e:
-        st.session_state.clear()
-        st.rerun()
+        logger.exception("Failed to fill and submit search input field.")
+        st.session_state.got_error = True
         raise e
 
 
@@ -120,30 +120,29 @@ def scraper(query):
     except Exception as e:
         logger.exception("Failed to initialize driver.")
         st.session_state.clear()
-        st.rerun()
         raise e
 
     try:
-
         url = f"{os.getenv('BASE_URL')}"
         driver.get(url)
-        wait = WebDriverWait(driver, 30)
+        logger.info(f"Website opened successfully.")
+        wait = WebDriverWait(driver, 10)
     except Exception as e:
         logger.exception("Failed to get the page.")
         st.session_state.clear()
-        st.rerun()
         raise e
 
     try:
         run_bot_detection(driver, wait)
-        run_location_change(driver, wait)
+        """run_location_change(driver, wait)"""
 
         run_search(driver, wait, query)
-        return driver.page_source
+        time.sleep(3)
+        page_source = driver.page_source
+        logger.info("Successfully extracted page source.")
+        return page_source
     except Exception as e:
         logger.exception("Failed at run 'scraping'.")
-        st.session_state.clear()
-        st.rerun()
         raise e
     finally:
         driver.quit()

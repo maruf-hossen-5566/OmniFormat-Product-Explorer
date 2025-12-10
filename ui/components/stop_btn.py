@@ -12,7 +12,10 @@ def stop_button():
         return
 
     with st.container(horizontal_alignment="center"):
-        if st.button("Stop / Reset"):
+        empty = st.empty()
+        if empty.button("Stop / Reset"):
+            empty.empty()
+            empty.markdown(":blue[Stopping the process...]", text_alignment="center")
             if st.session_state.get("driver"):
                 logger.info("Closing the browser...")
                 st.session_state.driver.quit()

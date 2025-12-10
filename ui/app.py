@@ -29,22 +29,35 @@ def states_initialization():
         st.session_state.output = None
     if "scraping_in_progress" not in st.session_state:
         st.session_state.scraping_in_progress = False
+        st.session_state.output = None
+    if "got_error" not in st.session_state:
+        st.session_state.got_error = False
 
 
 def data_preview():
     query = st.session_state.get("query")
     data = st.session_state.get("output")
+    got_error = st.session_state.get("got_error", False)
 
-    if not query and not data:
+    if got_error:
+        st.divider()
+        st.space("stretch")
+        st.error("⚠️ Something went wrong. Please try again.")
+        return
+
+    if not data:
         st.divider()
         st.space("stretch")
         st.markdown(
-            ":blue[🚫 No data yet. Enter a query and click “Scrape” to see results here.]",
-            text_alignment="center",
+            """:blue[🚫 No data yet.<br>Enter a query and click **Scrape** to see results here.]""",
+            unsafe_allow_html=True,
+            text_alignment="center"
         )
-    elif query and data:
-        st.space("stretch")
+        return
+
+    with st.container(horizontal_alignment="center"):
         card_tab, json_tab, csv_tab, stc_tab = data_preview_tabs()
+
         with json_tab:
             json_preview_tab(query, data)
         with card_tab:
@@ -53,7 +66,12 @@ def data_preview():
             csv_preview_tab(query, data)
         with stc_tab:
             stc_preview_tab(query, data)
-        if st.button("Clear Results", type="primary", key="clear-results-btn", width="stretch"):
+        if st.button(
+                "Clear Results",
+                type="primary",
+                key=f"clear-results-{id}",
+                use_container_width=True,
+        ):
             st.session_state.clear()
             st.rerun()
 
@@ -76,17 +94,16 @@ def run_scraping():
                         f"Scraping took '{round(time.time() - started_at)}' seconds."
                     )
                     st.session_state.started_at = None
-                st.rerun()
+            st.rerun()
         except Exception as e:
+            st.session_state.got_error = True
             logger.exception("Failed at run 'scraping'.")
-            st.session_state.clear()
             raise e
         finally:
             st.session_state.scraping_in_progress = False
             driver = st.session_state.get("driver")
             if driver:
                 driver.quit()
-            st.rerun()
 
 
 def layout():
@@ -101,12 +118,9 @@ def layout():
             with st.spinner("Scraping in progress..."):
                 run_scraping()
         data_preview()
-    except Exception as error:
-        logger.exception("Failed at run 'layout'.")
-        st.session_state.clear()
-        try:
-            st.error(error)
-        except Exception as e:
-            logger.exception(f"Failed to display error.\n{e}")
-        # st.rerun()
-        raise error
+        st.session_state.got_error = False
+        st.session_state.scraping_in_progress = False
+    except Exception as e:
+        st.session_state.got_error = True
+        logger.exception(f"Failed at run 'layout'.")
+        st.rerun()
