@@ -45,7 +45,7 @@ def data_preview():
         st.error("⚠️ Something went wrong. Please try again.")
         return
 
-    if not data:
+    if not data or data is None:
         st.divider()
         st.space("stretch")
         st.markdown(
@@ -104,6 +104,7 @@ def run_scraping():
             driver = st.session_state.get("driver")
             if driver:
                 driver.quit()
+            st.rerun()
 
 
 def layout():
