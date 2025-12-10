@@ -35,7 +35,7 @@ def extract_asin_and_title(product):
     try:
         asin = product.attrs.get("data-asin") if product and product.has_attr("data-asin") else "--"
 
-        title_elem = product.select_one("[data-cy='title-recipe'] h2 span")
+        title_elem = product.select_one("[data-cy='title-recipe'] a h2 span")
         title = title_elem.get_text(strip=True) if title_elem else None
         return asin, title
     except Exception as e:
