@@ -126,7 +126,7 @@ def scraper(query):
         url = f"{os.getenv('BASE_URL')}"
         driver.get(url)
         logger.info(f"Website opened successfully.")
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 25)
     except Exception as e:
         logger.exception("Failed to get the page.")
         st.session_state.clear()
