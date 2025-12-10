@@ -17,8 +17,6 @@ from logger import setup_logger
 
 logger = setup_logger(__name__)
 
-st.set_page_config("OmniFormat", "🧊")
-
 
 def states_initialization():
     if "driver" not in st.session_state:
