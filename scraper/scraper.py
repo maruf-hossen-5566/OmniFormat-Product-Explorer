@@ -16,14 +16,14 @@ logger = setup_logger(__name__)
 load_dotenv()
 
 
-def run_bot_detection(driver, wait):
+def run_bot_detection(driver):
     random_sleep()
     try:
         logger.info("Waiting for 'continue shopping' button...")
         if "Click the button below to continue shopping" in driver.page_source:
             continue_btn_selector = (By.CSS_SELECTOR, "button[type='submit']")
-            wait.until(EC.presence_of_element_located(continue_btn_selector))
-            continue_btn = wait.until(EC.element_to_be_clickable(continue_btn_selector))
+            WebDriverWait(driver, 7).until(EC.presence_of_element_located(continue_btn_selector))
+            continue_btn = WebDriverWait(driver, 7).until(EC.element_to_be_clickable(continue_btn_selector))
             if continue_btn:
                 continue_btn.click()
                 logger.info("Successfully clicked 'continue shopping' button.")
@@ -37,8 +37,8 @@ def run_bot_detection(driver, wait):
             By.XPATH,
             '//img[contains(@alt, "Sorry! Something went wrong")]',
         )
-        wait.until(EC.presence_of_element_located(image_selector))
-        image = wait.until(EC.element_to_be_clickable(image_selector))
+        WebDriverWait(driver, 7).until(EC.presence_of_element_located(image_selector))
+        image = WebDriverWait(driver, 7).until(EC.element_to_be_clickable(image_selector))
         if image:
             image.click()
             return
@@ -93,13 +93,13 @@ def run_bot_detection(driver, wait):
     driver.refresh()"""
 
 
-def run_search(driver, wait, query):
+def run_search(driver, query):
     try:
         random_sleep()
         logger.info("Waiting for 'search input' field...")
         search_input_selector = (By.ID, "twotabsearchtextbox")
-        wait.until(EC.presence_of_element_located(search_input_selector))
-        search_input = wait.until(EC.element_to_be_clickable(search_input_selector))
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located(search_input_selector))
+        search_input = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(search_input_selector))
         logger.info(f"User searched for '{query}'.")
         if search_input:
             search_input.clear()
@@ -133,10 +133,10 @@ def scraper(query):
         raise e
 
     try:
-        run_bot_detection(driver, wait)
+        run_bot_detection(driver)
         """run_location_change(driver, wait)"""
 
-        run_search(driver, wait, query)
+        run_search(driver, query)
         time.sleep(3)
         page_source = driver.page_source
         logger.info("Successfully extracted page source.")
